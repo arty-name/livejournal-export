@@ -1,24 +1,52 @@
 # Export your LiveJournal blog data
 
-[Livejournal provides a method to export your texts as 
+[Livejournal provides a method to export your posts as 
 XML](http://www.livejournal.com/export.bml). However 
 this has to be done manually for every month of your blog. 
-Also it does not export comments. I used this set of tools
-to help me at least with the first task. 
+Also [comments are exported separately](http://www.livejournal.com/developer/exporting.bml).
+I wrote this tool to make exporting more convenient.
 
-## download_xmls.py
+## export.py
 
-This script will download your entries in XML for all the years
-you specify. I took the simple way and did authentication by cookies
-taken from my browser. You will have to repeat the same for 
-your cookies.
+This script will do the exporting. Run it after you 
+have provided cookies and years as described below.
+You will end up with full blog contents in several 
+formats. `posts-html` folder will contain basic HTML
+of posts and comments. `posts-markdown` will contain
+posts in Markdown format with HTML comments and metadata 
+necessary to [generate a static blog with Pelican](http://docs.getpelican.com/).
+`posts-json` will contain posts with nested comments 
+in JSON format should you want to process them further.
 
-## lj_xml_to_md.py
+## auth.py
 
-This script will convert the entries from HTML wrapped in XML 
-to markdown files suitable to use in many 
-[static sites generators](http://staticsitegenerators.net/) 
-like [metalsmith](https://github.com/segmentio/metalsmith).
-The metadata like title, date, UTX tags will be saved in the
-front-matter in these files. It needs 
-[`html2text`](https://github.com/html2text/html2text/) to work.
+First of all you will have to log into Livejournal 
+and copy values of cookies `ljloggedin` and `ljmastersession` 
+to the file auth.py.
+
+## download_posts.py
+
+Edit this file to specify the range of years you want to export.
+This script will download your posts in XML into `posts-xml` 
+folder. Also it will create `posts-json/all.json` file with all 
+the same data in JSON format for convenient processing.
+
+## download_comments.py
+
+This script will download comments from your blog as `comments-xml/*.xml`
+files. Also it will create `comments-json/all.json` with all the 
+comments data in JSON format for convenient processing.
+
+## Requirements
+
+* `html2text`
+* `markdown`
+* `BeautifulSoup`
+* `requests`
+
+## Processing exported data separately
+
+In the last lines of `export.py` there's a condition `if True:`.
+Change `True` to `False` to skip the downloading step and go
+directly to the processing of already downloaded data.
+

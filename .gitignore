@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.idea
+comments-json
+comments-xml
+comments-markdown
+posts-xml
+posts-json
+posts-markdown
+posts-html
