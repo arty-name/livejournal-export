@@ -65,7 +65,7 @@ def get_more_comments(start_id, users):
             comment['state'] = comment_xml.attrib['state']
 
         if 'posterid' in comment:
-            comment['author'] = users[str(comment['posterid'])]
+            comment['author'] = users.get(str(comment['posterid']), "deleted-user")
 
         local_max_id = max(local_max_id, comment['id'])
         comments.append(comment)
