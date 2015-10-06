@@ -57,16 +57,15 @@ def download_posts():
     os.makedirs('posts-xml', exist_ok=True)
     os.makedirs('posts-json', exist_ok=True)
 
-    xml_posts = []
+    json_posts = []
     for year in YEARS:
         for month in range(1, 13):
             xml = fetch_month_posts(year, month)
-            xml_posts.extend(list(ET.fromstring(xml).iter('entry')))
+            json_posts.extend(map(xml_to_json, list(ET.fromstring(xml).iter('entry'))))
 
             with open('posts-xml/{0}-{1:02d}.xml'.format(year, month), 'w+') as file:
                 file.write(xml)
 
-    json_posts = list(map(xml_to_json, xml_posts))
     with open('posts-json/all.json', 'w') as f:
         f.write(json.dumps(json_posts, ensure_ascii=False, indent=2))
 
