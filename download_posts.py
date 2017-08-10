@@ -63,11 +63,11 @@ def download_posts():
             xml = fetch_month_posts(year, month)
             xml_posts.extend(list(ET.fromstring(xml).iter('entry')))
 
-            with open('posts-xml/{0}-{1:02d}.xml'.format(year, month), 'w+') as file:
+            with open('posts-xml/{0}-{1:02d}.xml'.format(year, month), 'w+', encoding='utf-8') as file:
                 file.write(xml)
 
     json_posts = list(map(xml_to_json, xml_posts))
-    with open('posts-json/all.json', 'w') as f:
+    with open('posts-json/all.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(json_posts, ensure_ascii=False, indent=2))
 
     return json_posts

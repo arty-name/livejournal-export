@@ -24,7 +24,7 @@ def get_users_map(xml):
     for user in xml.iter('usermap'):
         users[user.attrib['id']] = user.attrib['user']
 
-    with open('comments-json/usermap.json', 'w') as f:
+    with open('comments-json/usermap.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(users, ensure_ascii=False, indent=2))
 
     return users
@@ -46,7 +46,7 @@ def get_more_comments(start_id, users):
     local_max_id = -1
 
     xml = fetch_xml({'get': 'comment_body', 'startid': start_id})
-    with open('comments-xml/comment_body-{0}.xml'.format(start_id), 'w') as f:
+    with open('comments-xml/comment_body-{0}.xml'.format(start_id), 'w', encoding='utf-8') as f:
         f.write(xml)
 
     for comment_xml in ET.fromstring(xml).iter('comment'):
@@ -78,7 +78,7 @@ def download_comments():
     os.makedirs('comments-json', exist_ok=True)
 
     metadata_xml = fetch_xml({'get': 'comment_meta', 'startid': 0})
-    with open('comments-xml/comment_meta.xml', 'w') as f:
+    with open('comments-xml/comment_meta.xml', 'w', encoding='utf-8') as f:
         f.write(metadata_xml)
 
     metadata = ET.fromstring(metadata_xml)
@@ -91,7 +91,7 @@ def download_comments():
         start_id, comments = get_more_comments(start_id + 1, users)
         all_comments.extend(comments)
 
-    with open('comments-json/all.json', 'w') as f:
+    with open('comments-json/all.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(all_comments, ensure_ascii=False, indent=2))
 
     return all_comments

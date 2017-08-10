@@ -144,22 +144,22 @@ def comments_to_html(comments):
 
 def save_as_json(id, json_post, post_comments):
     json_data = {'id': id, 'post': json_post, 'comments': post_comments}
-    with open('posts-json/{0}.json'.format(id), 'w') as f:
+    with open('posts-json/{0}.json'.format(id), 'w', encoding='utf-8') as f:
         f.write(json.dumps(json_data, ensure_ascii=False, indent=2))
 
 
 def save_as_markdown(id, subfolder, json_post, post_comments_html):
     os.makedirs('posts-markdown/{0}'.format(subfolder), exist_ok=True)
-    with open('posts-markdown/{0}/{1}.md'.format(subfolder, id), 'w') as f:
+    with open('posts-markdown/{0}/{1}.md'.format(subfolder, id), 'w', encoding='utf-8') as f:
         f.write(json_to_markdown(json_post))
     if post_comments_html:
-        with open('comments-markdown/{0}.md'.format(json_post['slug']), 'w') as f:
+        with open('comments-markdown/{0}.md'.format(json_post['slug']), 'w', encoding='utf-8') as f:
             f.write(post_comments_html)
 
 
 def save_as_html(id, subfolder, json_post, post_comments_html):
     os.makedirs('posts-html/{0}'.format(subfolder), exist_ok=True)
-    with open('posts-html/{0}/{1}.html'.format(subfolder, id), 'w') as f:
+    with open('posts-html/{0}/{1}.html'.format(subfolder, id), 'w', encoding='utf-8') as f:
         f.writelines(json_to_html(json_post))
         if post_comments_html:
             f.write('\n<h2>Комментарии</h2>\n' + post_comments_html)
@@ -195,9 +195,9 @@ if __name__ == '__main__':
         all_comments = download_comments()
 
     else:
-        with open('posts-json/all.json', 'r') as f:
+        with open('posts-json/all.json', 'r', encoding='utf-8') as f:
             all_posts = json.load(f)
-        with open('comments-json/all.json', 'r') as f:
+        with open('comments-json/all.json', 'r', encoding='utf-8') as f:
             all_comments = json.load(f)
 
     combine(all_posts, all_comments)
