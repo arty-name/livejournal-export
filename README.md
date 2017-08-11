@@ -6,6 +6,8 @@ this has to be done manually for every month of your blog.
 Also [comments are exported separately](http://www.livejournal.com/developer/exporting.bml).
 I wrote this tool to make exporting more convenient.
 
+You will need Python 3 to use it.
+
 ## export.py
 
 This script will do the exporting. Run it after you 
