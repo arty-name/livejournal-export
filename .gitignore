@@ -8,3 +8,4 @@ posts-xml
 posts-json
 posts-markdown
 posts-html
+auth.py
