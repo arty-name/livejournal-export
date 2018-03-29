@@ -1,9 +1,12 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
+from __future__ import unicode_literals, print_function
 
 import os
 import json
 import requests
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree
+import time
+
 from auth import cookies, headers
 
 
@@ -14,11 +17,11 @@ def fetch_xml(params):
         headers=headers,
         cookies=cookies
     )
-
     return response.text
 
 
 def get_users_map(xml):
+    print('Fetching users')
     users = {}
 
     for user in xml.iter('usermap'):
@@ -42,6 +45,7 @@ def get_comment_element(name, comment_xml, comment):
 
 
 def get_more_comments(start_id, users):
+    print('Getting more comments')
     comments = []
     local_max_id = -1
 
@@ -49,7 +53,7 @@ def get_more_comments(start_id, users):
     with open('comments-xml/comment_body-{0}.xml'.format(start_id), 'w', encoding='utf-8') as f:
         f.write(xml)
 
-    for comment_xml in ET.fromstring(xml).iter('comment'):
+    for comment_xml in ElementTree.fromstring(xml).iter('comment'):
         comment = {
             'jitemid': int(comment_xml.attrib['jitemid']),
             'id': int(comment_xml.attrib['id']),
@@ -81,7 +85,7 @@ def download_comments():
     with open('comments-xml/comment_meta.xml', 'w', encoding='utf-8') as f:
         f.write(metadata_xml)
 
-    metadata = ET.fromstring(metadata_xml)
+    metadata = ElementTree.fromstring(metadata_xml)
     users = get_users_map(metadata)
 
     all_comments = []
@@ -90,6 +94,8 @@ def download_comments():
     while start_id < max_id:
         start_id, comments = get_more_comments(start_id + 1, users)
         all_comments.extend(comments)
+        print('Sleeping 1 sec between comment batches')
+        time.sleep(1)
 
     with open('comments-json/all.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(all_comments, ensure_ascii=False, indent=2))
@@ -99,4 +105,3 @@ def download_comments():
 
 if __name__ == '__main__':
     download_comments()
-    

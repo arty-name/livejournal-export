@@ -1,16 +1,19 @@
-#!/usr/bin/python3
-
-import json
+#!/usr/bin/env python3
+from __future__ import unicode_literals, print_function
 import os
+import time
+import json
+from xml.etree import ElementTree
+
 import requests
-import xml.etree.ElementTree as ET
+
 from auth import cookies, headers
 
-
-YEARS = range(2003, 2015)  # first to (last + 1)
+YEARS = range(2003, 2019)  # first to (last + 1)
 
 
 def fetch_month_posts(year, month):
+    print('Fetching posts {}-{}'.format(year, month))
     response = requests.post(
         'http://www.livejournal.com/export_do.bml',
         headers=headers,
@@ -61,10 +64,14 @@ def download_posts():
     for year in YEARS:
         for month in range(1, 13):
             xml = fetch_month_posts(year, month)
-            xml_posts.extend(list(ET.fromstring(xml).iter('entry')))
+            xml_posts.extend(list(ElementTree.fromstring(xml).iter('entry')))
 
             with open('posts-xml/{0}-{1:02d}.xml'.format(year, month), 'w+', encoding='utf-8') as file:
                 file.write(xml)
+            print('Sleeping 1 sec between months')
+            time.sleep(1)
+        print('Sleeping 4 sec between years')
+        time.sleep(4)
 
     json_posts = list(map(xml_to_json, xml_posts))
     with open('posts-json/all.json', 'w', encoding='utf-8') as f:
