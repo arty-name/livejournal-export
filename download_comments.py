@@ -9,7 +9,7 @@ from auth import cookies, headers
 
 def fetch_xml(params):
     response = requests.get(
-        'http://www.livejournal.com/export_comments.bml',
+        'https://www.livejournal.com/export_comments.bml',
         params=params,
         headers=headers,
         cookies=cookies
