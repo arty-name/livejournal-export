@@ -43,7 +43,7 @@ comments data in JSON format for convenient processing.
 
 * `html2text`
 * `markdown`
-* `BeautifulSoup`
+* `beautifulsoup4`
 * `requests`
 
 ## Processing exported data separately
