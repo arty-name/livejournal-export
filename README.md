@@ -45,6 +45,7 @@ comments data in JSON format for convenient processing.
 * `markdown`
 * `beautifulsoup4`
 * `requests`
+* `lxml`
 
 ## Processing exported data separately
 

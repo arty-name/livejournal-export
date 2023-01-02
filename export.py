@@ -51,7 +51,7 @@ def get_slug(json):
         slug = json['id']
 
     if '<' in slug or '&' in slug:
-        slug = BeautifulSoup('<p>{0}</p>'.format(slug)).text
+        slug = BeautifulSoup('<p>{0}</p>'.format(slug), features='lxml').text
 
     slug = re.compile(r'\W+').sub('-', slug)
     slug = re.compile(r'^-|-$').sub('', slug)
