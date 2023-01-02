@@ -11,6 +11,7 @@ from operator import itemgetter
 from download_posts import download_posts
 from download_comments import download_comments
 
+COMMENTS_HEADER = 'Комментарии'
 
 TAG = re.compile(r'\[!\[(.*?)\]\(http:\/\/utx.ambience.ru\/img\/.*?\)\]\(.*?\)')
 USER = re.compile(r'<lj user="?(.*?)"?>')
@@ -162,7 +163,7 @@ def save_as_html(id, subfolder, json_post, post_comments_html):
     with open('posts-html/{0}/{1}.html'.format(subfolder, id), 'w', encoding='utf-8') as f:
         f.writelines(json_to_html(json_post))
         if post_comments_html:
-            f.write('\n<h2>Комментарии</h2>\n' + post_comments_html)
+            f.write('\n<h2>{0}</h2>\n'.format(COMMENTS_HEADER) + post_comments_html)
 
 
 def combine(all_posts, all_comments):
