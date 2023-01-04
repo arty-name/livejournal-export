@@ -1,9 +1,12 @@
 __pycache__/
 *.py[cod]
+*.7z
+test.py
 .idea
 comments-json
 comments-xml
 comments-markdown
+posts-and-comments-markdown
 posts-xml
 posts-json
 posts-markdown
