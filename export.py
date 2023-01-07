@@ -17,7 +17,7 @@ TAG = re.compile(r'\[!\[(.*?)\]\(http:\/\/utx.ambience.ru\/img\/.*?\)\]\(.*?\)')
 USER = re.compile(r'<lj user="?(.*?)"?>')
 TAGLESS_NEWLINES = re.compile('(?<!>)\n')
 NEWLINES = re.compile('(\s*\n){3,}')
-TIME_ZONE = 4 # GMT+04:00
+TIME_ZONE = 3 # GMT+03:00 for Moscow
 SLUGS = {}
 
 # TODO: lj-cut
@@ -41,7 +41,7 @@ def json_to_html(json):
 {body}
 </article>
 """.format(
-        subject=json['subject'] or json['date'],
+        subject=json['subject'] or json['eventtime'],
         body=TAGLESS_NEWLINES.sub('<br>\n', json['body'])
     )
 
@@ -65,6 +65,11 @@ def get_slug(json):
     return slug
 
 
+def deescape(escaped_str) -> str:
+    # Remove extra \ before . or -
+    return re.sub(r'[\\]+([\.\-])', r'\1', escaped_str)
+
+
 def json_to_markdown(json):
     body = TAGLESS_NEWLINES.sub('<br>', json['body'])
 
@@ -82,12 +87,12 @@ def json_to_markdown(json):
     json['body'] = TAG.sub('', body).strip()
 
     json['slug'] = get_slug(json)
-    json['subject'] = json['subject'] or json['date']
+    json['subject'] = json['subject'] or json['eventtime']
 
     return """id: {id}
 title: {subject}
 slug: {slug}
-date: {date}{tags}
+date: {eventtime}{tags}
 
 {body}
 """.format(**json)
@@ -110,10 +115,10 @@ def json_to_alt_markdown(json):
     json['body'] = TAG.sub('', body).strip()
 
     json['slug'] = get_slug(json)
-    json['subject'] = json['subject'] or json['date']
+    json['subject'] = json['subject'] or json['eventtime']
 
     # get post time
-    post_date = str(datetime.strptime(json['date'],"%Y-%m-%d %H:%M:%S") + timedelta(hours = TIME_ZONE))
+    post_date = str(datetime.strptime(json['eventtime'],"%Y-%m-%d %H:%M:%S"))
     post_time = post_date[11:16] # Post's time = HH:MM
     note_header = '## {0}\n_{1}_\n'.format(json['subject'], post_time)
 
@@ -127,7 +132,7 @@ def json_to_alt_markdown(json):
 
     if len(post_attributes) > 0 : post_attributes += '\n'
 
-    return note_header + post_attributes + json['body']
+    return note_header + post_attributes + deescape(json['body'])
 
 
 def group_comments_by_post(comments):
@@ -219,8 +224,8 @@ def save_as_markdown(id, subfolder, json_post, post_comments_html):
 
 
 def save_together_as_markdown(id, subfolder, json_post, post_comments_html):
-    subfolder = json_post['date'][:4] # Note's year
-    note_name = json_post['date'][:10] # Note's file name = YYYY-MM-DD
+    subfolder = json_post['eventtime'][:4] # Note's year
+    note_name = json_post['eventtime'][:10] # Note's file name = YYYY-MM-DD
     os.makedirs('posts-and-comments-markdown/{0}'.format(subfolder), exist_ok=True)
     with open('posts-and-comments-markdown/{0}/{1}.md'.format(subfolder, note_name), 'a', encoding='utf-8') as f:
         f.write(json_to_alt_markdown(json_post) + '\n\n')
@@ -248,7 +253,7 @@ def combine(all_posts, all_comments):
         id = json_post['id']
         jitemid = int(id) >> 8
 
-        date = datetime.strptime(json_post['date'], '%Y-%m-%d %H:%M:%S') + timedelta(hours = TIME_ZONE)
+        date = datetime.strptime(json_post['eventtime'], '%Y-%m-%d %H:%M:%S')
         subfolder = '{0.year}-{0.month:02d}-{0.day:02d}'.format(date)
 
         post_comments = jitemid in posts_comments and nest_comments(posts_comments[jitemid]) or None
