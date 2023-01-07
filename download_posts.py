@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from auth import cookies, headers
 
 
-YEARS = range(2003, 2015)  # first to (last + 1)
+YEARS = range(1990, 2022)  # first to (last + 1)
 
 
 def fetch_month_posts(year, month):
