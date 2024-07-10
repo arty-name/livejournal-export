@@ -15,8 +15,8 @@ COMMENTS_HEADER = 'Комментарии'
 
 TAG = re.compile(r'\[!\[(.*?)\]\(http:\/\/utx.ambience.ru\/img\/.*?\)\]\(.*?\)')
 USER = re.compile(r'<lj user="?(.*?)"?>')
-TAGLESS_NEWLINES = re.compile('(?<!>)\n')
-NEWLINES = re.compile('(\s*\n){3,}')
+TAGLESS_NEWLINES = re.compile(r'(?<!>)\n')
+NEWLINES = re.compile(r'(\s*\n){3,}')
 
 SLUGS = {}
 
