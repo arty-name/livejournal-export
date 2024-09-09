@@ -23,7 +23,7 @@ in JSON format should you want to process them further.
 ## auth.py
 
 First of all you will have to log into Livejournal 
-and copy values of cookies `ljloggedin` and `ljmastersession` 
+and copy values of cookies `ljprof` and `ljuniq` 
 to the file auth.py.
 
 ## download_posts.py
