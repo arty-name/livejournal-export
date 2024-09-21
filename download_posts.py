@@ -1,16 +1,23 @@
 #!/usr/bin/python3
 
 import json
-import os
-import requests
+import os 
+import requests 
+from sys import exit as sysexit
 import xml.etree.ElementTree as ET
-from auth import cookies, headers
 
+# At original import time, first request range of years. We'll add 1 to the end year automatically.
+try:
+    startYear = int(input("Enter first year you want to export: "))
+    endYear = int(input("Enter last year you want to export: "))
+except:
+    print("\nI'm guessing you didn't enter a whole number there, did ya? Wanna try again? Exiting...")
+    sysexit(1)
 
-YEARS = range(2003, 2015)  # first to (last + 1)
+YEARS = range(startYear, endYear + 1)  # first to (last + 1)
 
-
-def fetch_month_posts(year, month):
+# Added cookies and headers to the definition for scope
+def fetch_month_posts(year, month, cookies, headers):
     response = requests.post(
         'https://www.livejournal.com/export_do.bml',
         headers=headers,
@@ -35,7 +42,6 @@ def fetch_month_posts(year, month):
 
     return response.text
 
-
 def xml_to_json(xml):
     def f(field):
         return xml.find(field).text
@@ -52,15 +58,18 @@ def xml_to_json(xml):
         'current_mood': f('current_mood')
     }
 
-
-def download_posts():
+# Added cookies and headers to the definition as they'll now be passed by the main python script
+def download_posts(cookies, headers):
+    cookies = cookies
+    headers = headers
     os.makedirs('posts-xml', exist_ok=True)
     os.makedirs('posts-json', exist_ok=True)
 
     xml_posts = []
     for year in YEARS:
         for month in range(1, 13):
-            xml = fetch_month_posts(year, month)
+            xml = fetch_month_posts(year, month, cookies, headers)
+            #print("XML content:", xml)
             xml_posts.extend(list(ET.fromstring(xml).iter('entry')))
 
             with open('posts-xml/{0}-{1:02d}.xml'.format(year, month), 'w+', encoding='utf-8') as file:
@@ -71,7 +80,6 @@ def download_posts():
         f.write(json.dumps(json_posts, ensure_ascii=False, indent=2))
 
     return json_posts
-
 
 if __name__ == '__main__':
     download_posts()
