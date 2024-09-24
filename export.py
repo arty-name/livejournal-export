@@ -47,9 +47,9 @@ if response.status_code != 200:
     print("Error - Return code:", response.status_code)
 
 # If successful, then get the 'Set-Cookie' key from the headers dict and parse it for the two cookies, placing them in a cookies dict
-curlOUTPUT = response.headers.get('Set-Cookie')
-ljloggedin_match = re.search(r'ljloggedin=([^\s;]+)', curlOUTPUT)
-ljmastersession_match = re.search(r'ljmastersession=([^\s;]+)', curlOUTPUT)
+resCookies = response.headers.get('Set-Cookie')
+ljloggedin_match = re.search(r'ljloggedin=([^\s;]+)', resCookies)
+ljmastersession_match = re.search(r'ljmastersession=([^\s;]+)', resCookies)
 cookies = {
     'ljloggedin': ljloggedin_match.group(1) if ljloggedin_match else None,
     'ljmastersession': ljmastersession_match.group(1) if ljmastersession_match else None,
@@ -61,14 +61,23 @@ headers = {
 }
 
 # If a cookie could not be successfully acquired, error out. Otherwise, get to work.
+errCookie = 0
+if cookies.get('ljloggedin') is None:
+    print("Error: 'ljloggedin' cookie was not acquired.")
+    errCookie += 1
+if cookies.get('ljmastersession') is None:
+    print("Error: 'ljmastersession' cookie was not acquired.")
+    errCookie += 1
 if any(value is None for value in cookies.values()):
-    print("Could not extract cookie data despite successful login.")
+    if errCookie == 1:
+        print("Only one of two required cookies acquired. Check connection and credentials. Exiting...")
+    else:
+        print("Failed to acquire both required cookies. Check connection and credentials. Exiting...")
     sysexit(1)
 else: 
     print("Login successful. Downloading posts and comments.")
-    print("When complete, you will find post-... and comment-... folders in the current location contained the different versions of your content.")
+    print("When complete, you will find post-... and comment-... folders in the current location\ncontaining the differently formated versions of your content.")
 
-# The real work:
 COMMENTS_HEADER = 'Комментарии'
 
 TAG = re.compile(r'\[!\[(.*?)\]\(http:\/\/utx.ambience.ru\/img\/.*?\)\]\(.*?\)')
@@ -78,6 +87,9 @@ NEWLINES = re.compile(r'(\s*\n){3,}')
 
 SLUGS = {}
 
+# TODO: lj-cut
+
+
 def fix_user_links(json):
     """ replace user links with usernames """
     if 'subject' in json:
@@ -85,6 +97,7 @@ def fix_user_links(json):
 
     if 'body' in json:
         json['body'] = USER.sub(r'\1', json['body'])
+
 
 def json_to_html(json):
     return """<!doctype html>
@@ -98,6 +111,7 @@ def json_to_html(json):
         subject=json['subject'] or json['date'],
         body=TAGLESS_NEWLINES.sub('<br>\n', json['body'])
     )
+
 
 def get_slug(json):
     slug = json['subject']
@@ -126,11 +140,17 @@ def json_to_markdown(json):
     h.unicode_snob = True
     body = h.handle(body)
     body = NEWLINES.sub('\n\n', body)
+
+    # read UTX tags
     tags = TAG.findall(body)
     json['tags'] = len(tags) and '\ntags: {0}'.format(', '.join(tags)) or ''
+
+    # remove UTX tags from text
     json['body'] = TAG.sub('', body).strip()
+
     json['slug'] = get_slug(json)
     json['subject'] = json['subject'] or json['date']
+
     return """id: {id}
 title: {subject}
 slug: {slug}
@@ -142,13 +162,18 @@ date: {date}{tags}
 
 def group_comments_by_post(comments):
     posts = {}
+
     for comment in comments:
         post_id = comment['jitemid']
+
         if post_id not in posts:
             posts[post_id] = {}
+
         post = posts[post_id]
         post[comment['id']] = comment
+
     return posts
+
 
 def nest_comments(comments):
     post = []
@@ -162,6 +187,7 @@ def nest_comments(comments):
             comments[comment['parentid']]['children'].append(comment)
 
     return post
+
 
 def comment_to_li(comment):
     if 'state' in comment and comment['state'] == 'D':
@@ -183,10 +209,12 @@ def comment_to_li(comment):
 def comments_to_html(comments):
     return '<ul>\n{0}\n</ul>'.format('\n'.join(map(comment_to_li, sorted(comments, key=itemgetter('id')))))
 
+
 def save_as_json(id, json_post, post_comments):
     json_data = {'id': id, 'post': json_post, 'comments': post_comments}
     with open('posts-json/{0}.json'.format(id), 'w', encoding='utf-8') as f:
         f.write(json.dumps(json_data, ensure_ascii=False, indent=2))
+
 
 def save_as_markdown(id, subfolder, json_post, post_comments_html):
     os.makedirs('posts-markdown/{0}'.format(subfolder), exist_ok=True)
@@ -196,12 +224,14 @@ def save_as_markdown(id, subfolder, json_post, post_comments_html):
         with open('comments-markdown/{0}.md'.format(json_post['slug']), 'w', encoding='utf-8') as f:
             f.write(post_comments_html)
 
+
 def save_as_html(id, subfolder, json_post, post_comments_html):
     os.makedirs('posts-html/{0}'.format(subfolder), exist_ok=True)
     with open('posts-html/{0}/{1}.html'.format(subfolder, id), 'w', encoding='utf-8') as f:
         f.writelines(json_to_html(json_post))
         if post_comments_html:
             f.write('\n<h2>{0}</h2>\n'.format(COMMENTS_HEADER) + post_comments_html)
+
 
 def combine(all_posts, all_comments):
     os.makedirs('posts-html', exist_ok=True)
@@ -226,9 +256,9 @@ def combine(all_posts, all_comments):
         save_as_html(id, subfolder, json_post, post_comments_html)
         save_as_markdown(id, subfolder, json_post, post_comments_html)
 
+
 if __name__ == '__main__':
     if True:
-        # modified these calls to include cookies and headers since they can't be imported from auth.py anymore
         all_posts = download_posts(cookies, headers)
         all_comments = download_comments(cookies, headers)
 

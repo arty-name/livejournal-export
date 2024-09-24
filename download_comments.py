@@ -5,7 +5,6 @@ import json
 import requests
 import xml.etree.ElementTree as ET
 
-# Adding cookies and headers to definition for scope
 def fetch_xml(params, cookies, headers):
     response = requests.get(
         'https://www.livejournal.com/export_comments.bml',
@@ -40,7 +39,6 @@ def get_comment_element(name, comment_xml, comment):
         comment[name] = elements[0].text
 
 
-# Adding cookies and headers to definitions for scope
 def get_more_comments(start_id, users, cookies, headers):
     comments = []
     local_max_id = -1
@@ -72,10 +70,7 @@ def get_more_comments(start_id, users, cookies, headers):
 
     return local_max_id, comments
 
-# Adding cookies and headers to definition since we won't get from auth.py
-def download_comments(Cookies, Headers):
-    cookies = Cookies
-    headers = Headers
+def download_comments(cookies, headers):
     os.makedirs('comments-xml', exist_ok=True)
     os.makedirs('comments-json', exist_ok=True)
 

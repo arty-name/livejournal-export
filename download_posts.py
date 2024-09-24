@@ -6,17 +6,21 @@ import requests
 from sys import exit as sysexit
 import xml.etree.ElementTree as ET
 
-# At original import time, first request range of years. We'll add 1 to the end year automatically.
+# At time of script import, request range of years. We'll add 1 to the end year automatically.
 try:
     startYear = int(input("Enter first year you want to export: "))
+except:
+    print("\nError with first year entered. Exiting...")
+    sysexit(1)
+
+try:
     endYear = int(input("Enter last year you want to export: "))
 except:
-    print("\nI'm guessing you didn't enter a whole number there, did ya? Wanna try again? Exiting...")
+    print("\nError with last year entered. Exiting...")
     sysexit(1)
 
 YEARS = range(startYear, endYear + 1)  # first to (last + 1)
 
-# Added cookies and headers to the definition for scope
 def fetch_month_posts(year, month, cookies, headers):
     response = requests.post(
         'https://www.livejournal.com/export_do.bml',
@@ -58,10 +62,7 @@ def xml_to_json(xml):
         'current_mood': f('current_mood')
     }
 
-# Added cookies and headers to the definition as they'll now be passed by the main python script
 def download_posts(cookies, headers):
-    cookies = cookies
-    headers = headers
     os.makedirs('posts-xml', exist_ok=True)
     os.makedirs('posts-json', exist_ok=True)
 
@@ -69,7 +70,6 @@ def download_posts(cookies, headers):
     for year in YEARS:
         for month in range(1, 13):
             xml = fetch_month_posts(year, month, cookies, headers)
-            #print("XML content:", xml)
             xml_posts.extend(list(ET.fromstring(xml).iter('entry')))
 
             with open('posts-xml/{0}-{1:02d}.xml'.format(year, month), 'w+', encoding='utf-8') as file:
