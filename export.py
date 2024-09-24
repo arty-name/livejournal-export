@@ -22,16 +22,18 @@ headers = {
     "sec-ch-ua-platform": '"Windows"',
 }
 
-try:
-    # Get a "luid" cookie so it'll accept our form login.
-    cookies = {
-        'luid': requests.get("https://www.livejournal.com/", headers=headers).headers.get('Set-Cookie').split('luid=')[1].split(';')[0]
-    }
 
+# Get a "luid" cookie so it'll accept our form login.
+try:
+    response = requests.get("https://www.livejournal.com/", headers=headers)
 except:
     # If attempt to reach LiveJournal fails, error out.
     print("Couldn't reach www.livejournal.com, please check internet connection. Exiting.")
     sysexit(1)
+
+cookies = {
+    'luid': get_cookie_value(response, 'luid')
+}
 
 # Populate dictionary for request
 credentials = {
@@ -47,12 +49,9 @@ if response.status_code != 200:
     print("Error - Return code:", response.status_code)
 
 # If successful, then get the 'Set-Cookie' key from the headers dict and parse it for the two cookies, placing them in a cookies dict
-resCookies = response.headers.get('Set-Cookie')
-ljloggedin_match = re.search(r'ljloggedin=([^\s;]+)', resCookies)
-ljmastersession_match = re.search(r'ljmastersession=([^\s;]+)', resCookies)
 cookies = {
-    'ljloggedin': ljloggedin_match.group(1) if ljloggedin_match else None,
-    'ljmastersession': ljmastersession_match.group(1) if ljmastersession_match else None,
+    'ljloggedin': get_cookie_value(response, 'ljloggedin'),
+    'ljmastersession': get_cookie_value(response, 'ljmastersession')
 }
 
 # Credit to the Author!
@@ -158,6 +157,19 @@ date: {date}{tags}
 
 {body}
 """.format(**json)
+
+def get_cookie_value(response, cName):
+    try:
+        header = response.headers.get('Set-Cookie')
+
+        if header:
+            return header.split(f'{cName}=')[1].split(';')[0]
+        else:
+            raise ValueError(f'Cookie {cName} not found in response.')
+
+    except Exception as e:
+        print(f"Error extracting cookie: {cName}. Error: {e}. Exiting...")
+        sys.exit(1)
 
 
 def group_comments_by_post(comments):
