@@ -26,9 +26,9 @@ headers = {
 # Get a "luid" cookie so it'll accept our form login.
 try:
     response = requests.get("https://www.livejournal.com/", headers=headers)
-except:
+except Exception as e:
     # If attempt to reach LiveJournal fails, error out.
-    print("Couldn't reach www.livejournal.com, please check internet connection. Exiting.")
+    print(f"Could not retrieve pre-connection cookie from www.livejournal.com. Error: {e}. Exiting.")
     sysexit(1)
 
 cookies = {
@@ -59,23 +59,9 @@ headers = {
     'User-Agent': 'https://github.com/arty-name/livejournal-export; me@arty.name'
 }
 
-# If a cookie could not be successfully acquired, error out. Otherwise, get to work.
-errCookie = 0
-if cookies.get('ljloggedin') is None:
-    print("Error: 'ljloggedin' cookie was not acquired.")
-    errCookie += 1
-if cookies.get('ljmastersession') is None:
-    print("Error: 'ljmastersession' cookie was not acquired.")
-    errCookie += 1
-if any(value is None for value in cookies.values()):
-    if errCookie == 1:
-        print("Only one of two required cookies acquired. Check connection and credentials. Exiting...")
-    else:
-        print("Failed to acquire both required cookies. Check connection and credentials. Exiting...")
-    sysexit(1)
-else: 
-    print("Login successful. Downloading posts and comments.")
-    print("When complete, you will find post-... and comment-... folders in the current location\ncontaining the differently formated versions of your content.")
+# Now that we have the cookies, notify the user that we'll grab the LJ posts and comments
+print("Login successful. Downloading posts and comments.")
+print("When complete, you will find post-... and comment-... folders in the current location\ncontaining the differently formated versions of your content.")
 
 COMMENTS_HEADER = 'Комментарии'
 
@@ -168,8 +154,8 @@ def get_cookie_value(response, cName):
             raise ValueError(f'Cookie {cName} not found in response.')
 
     except Exception as e:
-        print(f"Error extracting cookie: {cName}. Error: {e}. Exiting...")
-        sys.exit(1)
+        print(f"Error extracting required cookie: {cName}. Error: {e}. Exiting...")
+        sysexit(1)
 
 
 def group_comments_by_post(comments):
