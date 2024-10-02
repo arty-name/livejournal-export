@@ -14,6 +14,20 @@ from operator import itemgetter
 from download_posts import download_posts
 from download_comments import download_comments
 
+def get_cookie_value(response, cName):
+    try:
+        header = response.headers.get('Set-Cookie')
+
+        if header:
+            return header.split(f'{cName}=')[1].split(';')[0]
+        else:
+            raise ValueError(f'Cookie {cName} not found in response.')
+
+    except Exception as e:
+        print(f"Error extracting required cookie: {cName}. Error: {e}. Exiting...")
+        sysexit(1)
+
+
 # Generic headers to prevent LiveJournal from throwing out this random solicitation
 headers = {
     "Upgrade-Insecure-Requests": "1",
@@ -143,20 +157,6 @@ date: {date}{tags}
 
 {body}
 """.format(**json)
-
-def get_cookie_value(response, cName):
-    try:
-        header = response.headers.get('Set-Cookie')
-
-        if header:
-            return header.split(f'{cName}=')[1].split(';')[0]
-        else:
-            raise ValueError(f'Cookie {cName} not found in response.')
-
-    except Exception as e:
-        print(f"Error extracting required cookie: {cName}. Error: {e}. Exiting...")
-        sysexit(1)
-
 
 def group_comments_by_post(comments):
     posts = {}
