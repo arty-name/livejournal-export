@@ -10,34 +10,34 @@ You will need Python 3 to use it.
 
 ## export.py
 
-This script will do the exporting. Run it after you 
-have provided cookies and years as described below.
-You will end up with full blog contents in several 
-formats. `posts-html` folder will contain basic HTML
-of posts and comments. `posts-markdown` will contain
-posts in Markdown format with HTML comments and metadata 
-necessary to [generate a static blog with Pelican](http://docs.getpelican.com/).
+This script will do the exporting. You will end up with
+full blog contents in several formats. `posts-html` folder
+will contain basic HTML of posts and comments.
+`posts-markdown` will contain posts in Markdown format
+with HTML comments and metadata necessary to
+[generate a static blog with Pelican](http://docs.getpelican.com/).
 `posts-json` will contain posts with nested comments 
 in JSON format should you want to process them further.
 
-## auth.py
-
-First of all you will have to log into Livejournal 
-and copy values of cookies `ljloggedin` and `ljmastersession` 
-to the file auth.py.
+This version of the script does not require you to make any
+modifications prior to running it. It will prompt you for
+the range of years you want to pull, then will ask for your
+LiveJournal username and password. It will use that to 
+acquire the required session cookies. After this, the
+download process will begin.
 
 ## download_posts.py
 
-Edit this file to specify the range of years you want to export.
 This script will download your posts in XML into `posts-xml` 
-folder. Also it will create `posts-json/all.json` file with all 
+folder. Also it will create `posts-json/all.json` file with
 the same data in JSON format for convenient processing.
 
 ## download_comments.py
 
-This script will download comments from your blog as `comments-xml/*.xml`
-files. Also it will create `comments-json/all.json` with all the 
-comments data in JSON format for convenient processing.
+This script will download comments from your blog as 
+`comments-xml/*.xml` files. Also it will create
+`comments-json/all.json` with all the comments data in
+JSON format for convenient processing.
 
 ## Requirements
 

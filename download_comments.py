@@ -4,10 +4,8 @@ import os
 import json
 import requests
 import xml.etree.ElementTree as ET
-from auth import cookies, headers
 
-
-def fetch_xml(params):
+def fetch_xml(params, cookies, headers):
     response = requests.get(
         'https://www.livejournal.com/export_comments.bml',
         params=params,
@@ -41,11 +39,11 @@ def get_comment_element(name, comment_xml, comment):
         comment[name] = elements[0].text
 
 
-def get_more_comments(start_id, users):
+def get_more_comments(start_id, users, cookies, headers):
     comments = []
     local_max_id = -1
 
-    xml = fetch_xml({'get': 'comment_body', 'startid': start_id})
+    xml = fetch_xml({'get': 'comment_body', 'startid': start_id}, cookies, headers)
     with open('comments-xml/comment_body-{0}.xml'.format(start_id), 'w', encoding='utf-8') as f:
         f.write(xml)
 
@@ -72,12 +70,11 @@ def get_more_comments(start_id, users):
 
     return local_max_id, comments
 
-
-def download_comments():
+def download_comments(cookies, headers):
     os.makedirs('comments-xml', exist_ok=True)
     os.makedirs('comments-json', exist_ok=True)
 
-    metadata_xml = fetch_xml({'get': 'comment_meta', 'startid': 0})
+    metadata_xml = fetch_xml({'get': 'comment_meta', 'startid': 0}, cookies, headers)
     with open('comments-xml/comment_meta.xml', 'w', encoding='utf-8') as f:
         f.write(metadata_xml)
 
@@ -88,7 +85,7 @@ def download_comments():
     start_id = 0
     max_id = int(metadata.find('maxid').text)
     while start_id < max_id:
-        start_id, comments = get_more_comments(start_id + 1, users)
+        start_id, comments = get_more_comments(start_id + 1, users, cookies, headers)
         all_comments.extend(comments)
 
     with open('comments-json/all.json', 'w', encoding='utf-8') as f:
@@ -99,4 +96,3 @@ def download_comments():
 
 if __name__ == '__main__':
     download_comments()
-    
