@@ -9,14 +9,14 @@ import xml.etree.ElementTree as ET
 # At time of script import, request range of years. We'll add 1 to the end year automatically.
 try:
     startYear = int(input("Enter first year you want to export: "))
-except:
-    print("\nError with first year entered. Exiting...")
+except Exception as e:
+    print(f"\nError with first year entered. Error: {e}. Exiting...")
     sysexit(1)
 
 try:
     endYear = int(input("Enter last year you want to export: "))
-except:
-    print("\nError with last year entered. Exiting...")
+except Exception as e:
+    print(f"\nError with last year entered. Error: {e}. Exiting...")
     sysexit(1)
 
 YEARS = range(startYear, endYear + 1)  # first to (last + 1)
