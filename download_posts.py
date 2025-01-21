@@ -8,6 +8,8 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
+DATE_FORMAT = '%Y%m%d'
+
 def get_date_input(prompt):
     try:
         start_date = int(input("Enter start date in YYYYMMDD format: "))
