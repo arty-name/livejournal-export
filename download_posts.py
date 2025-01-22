@@ -70,7 +70,6 @@ def download_posts(cookies, headers):
     xml_posts = []
     month_cursor = start_month
 
-    # Iterate over each month within the range
     while month_cursor <= end_month:
         year = month_cursor.year
         month = month_cursor.month
@@ -81,7 +80,7 @@ def download_posts(cookies, headers):
         with open('posts-xml/{0}-{1:02d}.xml'.format(year, month), 'w+', encoding='utf-8') as file:
             file.write(xml)
         
-        month_cursor = month_cursor + relativedelta(months=1)  # Move to next month
+        month_cursor = month_cursor + relativedelta(months=1)  
 
     json_posts = list(map(xml_to_json, xml_posts))
     with open('posts-json/all.json', 'w', encoding='utf-8') as f:
