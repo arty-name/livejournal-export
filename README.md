@@ -21,7 +21,7 @@ in JSON format should you want to process them further.
 
 This version of the script does not require you to make any
 modifications prior to running it. It will prompt you for
-the range of years you want to pull, then will ask for your
+the range of months you want to pull, then will ask for your
 LiveJournal username and password. It will use that to 
 acquire the required session cookies. After this, the
 download process will begin.
