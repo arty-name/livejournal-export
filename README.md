@@ -41,6 +41,7 @@ JSON format for convenient processing.
 
 ## Requirements
 
+* `dateutil`
 * `html2text`
 * `markdown`
 * `beautifulsoup4`
