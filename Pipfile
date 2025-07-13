@@ -1,0 +1,16 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+python-dateutil = "*"
+html2text = "*"
+markdown = "*"
+beautifulsoup4 = "*"
+requests = "*"
+lxml = "*"
+[dev-packages]
+
+[requires]
+python_version = "3"

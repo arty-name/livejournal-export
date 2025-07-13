@@ -41,12 +41,11 @@ JSON format for convenient processing.
 
 ## Requirements
 
-* `dateutil`
-* `html2text`
-* `markdown`
-* `beautifulsoup4`
-* `requests`
-* `lxml`
+See [Pipfile](Pipfile) for up-to-date requirements list.
+
+Run `pipenv install && pipenv run ./export.py` to run the script in created virtual enviromnent.
+
+More about `pipenv` can be found [in Pipenv documentation](https://pipenv.pypa.io/en/latest/).
 
 ## Processing exported data separately
 
