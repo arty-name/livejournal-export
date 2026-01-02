@@ -74,16 +74,41 @@ def download_comments(cookies, headers):
     os.makedirs('comments-xml', exist_ok=True)
     os.makedirs('comments-json', exist_ok=True)
 
-    metadata_xml = fetch_xml({'get': 'comment_meta', 'startid': 0}, cookies, headers)
-    with open('comments-xml/comment_meta.xml', 'w', encoding='utf-8') as f:
-        f.write(metadata_xml)
-
-    metadata = ET.fromstring(metadata_xml)
-    users = get_users_map(metadata)
+    # Fetch all comment_meta batches to get complete usermap
+    users = {}
+    meta_start_id = 0
+    max_id = None
+    
+    while True:
+        metadata_xml = fetch_xml({'get': 'comment_meta', 'startid': meta_start_id}, cookies, headers)
+        with open(f'comments-xml/comment_meta-{meta_start_id}.xml', 'w', encoding='utf-8') as f:
+            f.write(metadata_xml)
+        
+        metadata = ET.fromstring(metadata_xml)
+        
+        # Get maxid from first batch
+        if max_id is None:
+            max_id = int(metadata.find('maxid').text)
+        
+        # Extract users from this batch
+        for user in metadata.iter('usermap'):
+            users[user.attrib['id']] = user.attrib['user']
+        
+        # Check if there are more batches
+        nextid_elem = metadata.find('nextid')
+        if nextid_elem is None:
+            break
+        next_id = int(nextid_elem.text)
+        if next_id <= meta_start_id:
+            break
+        meta_start_id = next_id
+    
+    # Save usermap
+    with open('comments-json/usermap.json', 'w', encoding='utf-8') as f:
+        f.write(json.dumps(users, ensure_ascii=False, indent=2))
 
     all_comments = []
     start_id = 0
-    max_id = int(metadata.find('maxid').text)
     while start_id < max_id:
         start_id, comments = get_more_comments(start_id + 1, users, cookies, headers)
         all_comments.extend(comments)
