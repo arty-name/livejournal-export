@@ -48,6 +48,7 @@ def fetch_month_posts(year, month, cookies, headers):
     )
     return response.text
 
+
 def xml_to_json(xml):
     def f(field):
         return xml.find(field).text
@@ -63,6 +64,7 @@ def xml_to_json(xml):
         'current_music': f('current_music'),
         'current_mood': f('current_mood')
     }
+
 
 def download_posts(cookies, headers):
     os.makedirs('posts-xml', exist_ok=True)
@@ -86,6 +88,7 @@ def download_posts(cookies, headers):
     save_json_file('posts-json/all.json', json_posts)
 
     return json_posts
+
 
 if __name__ == '__main__':
     download_posts()

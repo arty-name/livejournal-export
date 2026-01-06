@@ -38,7 +38,6 @@ headers = {
     "sec-ch-ua-platform": '"Windows"',
 }
 
-
 # Get a "luid" cookie so it'll accept our form login.
 try:
     response = requests.get("https://www.livejournal.com/", headers=headers)
@@ -77,7 +76,8 @@ headers = {
 
 # Now that we have the cookies, notify the user that we'll grab the LJ posts and comments
 print("Login successful. Downloading posts and comments.")
-print("When complete, you will find post-... and comment-... folders in the current location\ncontaining the differently formated versions of your content.")
+print(
+    "When complete, you will find post-... and comment-... folders in the current location\ncontaining the differently formated versions of your content.")
 
 COMMENTS_HEADER = 'Комментарии'
 
@@ -88,6 +88,7 @@ TAGLESS_NEWLINES = re.compile(r'(?<!>)\n')
 NEWLINES = re.compile(r'(\s*\n){3,}')
 
 SLUGS = {}
+
 
 # TODO: lj-cut
 
@@ -162,6 +163,7 @@ date: {json['date']}{tags_text}
 
 {body}
 """
+
 
 def group_comments_by_post(comments):
     posts = {}
