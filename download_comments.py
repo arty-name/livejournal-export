@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
 import os
-import json
 import requests
 import xml.etree.ElementTree as ET
+
+from utilities import save_json_file, save_text_file
+
 
 def fetch_xml(params, cookies, headers):
     response = requests.get(
@@ -41,8 +43,7 @@ def get_more_comments(start_id, users, cookies, headers):
     local_max_id = -1
 
     xml = fetch_xml({'get': 'comment_body', 'startid': start_id}, cookies, headers)
-    with open('comments-xml/comment_body-{0}.xml'.format(start_id), 'w', encoding='utf-8') as f:
-        f.write(xml)
+    save_text_file('comments-xml/comment_body-{0}.xml'.format(start_id), xml)
 
     for comment_xml in ET.fromstring(xml).iter('comment'):
         comment = {
@@ -74,8 +75,7 @@ def comment_meta(cookies, headers):
 
     while start_id is not None and start_id > last_id:
         xml = fetch_xml({'get': 'comment_meta', 'startid': start_id}, cookies, headers)
-        with open('comments-xml/comment_meta-{0}.xml'.format(start_id), 'w', encoding='utf-8') as f:
-            f.write(xml)
+        save_text_file('comments-xml/comment_meta-{0}.xml'.format(start_id), xml)
 
         metadata = ET.fromstring(xml)
         yield metadata
@@ -98,8 +98,7 @@ def download_comments(cookies, headers):
         if max_id is None:
             max_id = int(metadata.find('maxid').text)
 
-    with open('comments-json/usermap.json', 'w', encoding='utf-8') as f:
-        f.write(json.dumps(users, ensure_ascii=False, indent=2))
+    save_json_file('comments-json/usermap.json', users)
 
     all_comments = []
     start_id = 0
@@ -107,8 +106,7 @@ def download_comments(cookies, headers):
         start_id, comments = get_more_comments(start_id + 1, users, cookies, headers)
         all_comments.extend(comments)
 
-    with open('comments-json/all.json', 'w', encoding='utf-8') as f:
-        f.write(json.dumps(all_comments, ensure_ascii=False, indent=2))
+    save_json_file('comments-json/all.json', all_comments)
 
     return all_comments
 

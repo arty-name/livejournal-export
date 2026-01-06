@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 
-import json
 import os
 import requests
 from sys import exit as sysexit
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+
+from utilities import save_json_file, save_text_file
 
 DATE_FORMAT = '%Y-%m'
 
@@ -77,14 +78,12 @@ def download_posts(cookies, headers):
         xml = fetch_month_posts(year, month, cookies, headers)
         xml_posts.extend(list(ET.fromstring(xml).iter('entry')))
 
-        with open('posts-xml/{0}-{1:02d}.xml'.format(year, month), 'w+', encoding='utf-8') as file:
-            file.write(xml)
-        
-        month_cursor = month_cursor + relativedelta(months=1)  
+        save_text_file('posts-xml/{0}-{1:02d}.xml'.format(year, month), xml)
+
+        month_cursor = month_cursor + relativedelta(months=1)
 
     json_posts = list(map(xml_to_json, xml_posts))
-    with open('posts-json/all.json', 'w', encoding='utf-8') as f:
-        f.write(json.dumps(json_posts, ensure_ascii=False, indent=2))
+    save_json_file('posts-json/all.json', json_posts)
 
     return json_posts
 

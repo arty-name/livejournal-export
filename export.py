@@ -2,9 +2,9 @@
 
 import os
 import json
-import re 
+import re
 import html2text
-import requests 
+import requests
 from sys import exit as sysexit
 from bs4 import BeautifulSoup
 from getpass import getpass
@@ -13,6 +13,8 @@ from markdown import markdown
 from operator import itemgetter
 from download_posts import download_posts
 from download_comments import download_comments
+from utilities import save_json_file, save_text_file
+
 
 def get_cookie_value(response, cName):
     try:
@@ -210,25 +212,23 @@ def comments_to_html(comments):
 
 def save_as_json(id, json_post, post_comments):
     json_data = {'id': id, 'post': json_post, 'comments': post_comments}
-    with open('posts-json/{0}.json'.format(id), 'w', encoding='utf-8') as f:
-        f.write(json.dumps(json_data, ensure_ascii=False, indent=2))
+    save_json_file('posts-json/{0}.json'.format(id), json_data)
 
 
 def save_as_markdown(id, subfolder, json_post, post_comments_html):
     os.makedirs('posts-markdown/{0}'.format(subfolder), exist_ok=True)
-    with open('posts-markdown/{0}/{1}.md'.format(subfolder, id), 'w', encoding='utf-8') as f:
-        f.write(json_to_markdown(json_post))
+    save_text_file('posts-markdown/{0}/{1}.md'.format(subfolder, id), json_to_markdown(json_post))
     if post_comments_html:
-        with open('comments-markdown/{0}.md'.format(json_post['slug']), 'w', encoding='utf-8') as f:
-            f.write(post_comments_html)
+        save_text_file('comments-markdown/{0}.md'.format(json_post['slug']), post_comments_html)
 
 
 def save_as_html(id, subfolder, json_post, post_comments_html):
     os.makedirs('posts-html/{0}'.format(subfolder), exist_ok=True)
-    with open('posts-html/{0}/{1}.html'.format(subfolder, id), 'w', encoding='utf-8') as f:
-        f.writelines(json_to_html(json_post))
-        if post_comments_html:
-            f.write('\n<h2>{0}</h2>\n'.format(COMMENTS_HEADER) + post_comments_html)
+    html = json_to_html(json_post)
+    if post_comments_html:
+        html += '\n<h2>{0}</h2>\n'.format(COMMENTS_HEADER) + post_comments_html
+
+    save_text_file('posts-html/{0}/{1}.html'.format(subfolder, id), html)
 
 
 def combine(all_posts, all_comments):
