@@ -12,15 +12,15 @@ from utilities import save_json_file, save_text_file
 DATE_FORMAT = '%Y-%m'
 
 try:
-    start_month = datetime.strptime(input("Enter start month in YYYY-MM format: "), DATE_FORMAT)
+    start_month = datetime.strptime(input('Enter start month in YYYY-MM format: '), DATE_FORMAT)
 except Exception as e:
-    print(f"\nError with start month entered. Error: {e}. Exiting...")
+    print(f'\nError with start month entered. Error: {e}. Exiting...')
     sysexit(1)
 
 try:
-    end_month = datetime.strptime(input("Enter end month in YYYY-MM format: "), DATE_FORMAT)
+    end_month = datetime.strptime(input('Enter end month in YYYY-MM format: '), DATE_FORMAT)
 except Exception as e:
-    print(f"\nError with end month entered. Error: {e}. Exiting...")
+    print(f'\nError with end month entered. Error: {e}. Exiting...')
     sysexit(1)
 
 

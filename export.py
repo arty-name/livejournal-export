@@ -26,24 +26,24 @@ def get_cookie_value(response, cName):
             raise ValueError(f'Cookie {cName} not found in response.')
 
     except Exception as e:
-        print(f"Error extracting required cookie: {cName}. Error: {e}. Exiting...")
+        print(f'Error extracting required cookie: {cName}. Error: {e}. Exiting...')
         sysexit(1)
 
 
 # Generic headers to prevent LiveJournal from throwing out this random solicitation
 headers = {
-    "Upgrade-Insecure-Requests": "1",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 OPR/113.0.0.0",
-    "sec-ch-ua": '"Chromium";v="127"',
-    "sec-ch-ua-platform": '"Windows"',
+    'Upgrade-Insecure-Requests': '1',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36 OPR/113.0.0.0',
+    'sec-ch-ua': '"Chromium";v="127"',
+    'sec-ch-ua-platform': '"Windows"',
 }
 
 # Get a "luid" cookie so it'll accept our form login.
 try:
-    response = requests.get("https://www.livejournal.com/", headers=headers)
+    response = requests.get('https://www.livejournal.com/', headers=headers)
 except Exception as e:
     # If attempt to reach LiveJournal fails, error out.
-    print(f"Could not retrieve pre-connection cookie from www.livejournal.com. Error: {e}. Exiting.")
+    print(f'Could not retrieve pre-connection cookie from www.livejournal.com. Error: {e}. Exiting.')
     sysexit(1)
 
 cookies = {
@@ -52,16 +52,16 @@ cookies = {
 
 # Populate dictionary for request
 credentials = {
-    'user': input("Enter LiveJournal Username: "),
-    'password': getpass("Enter LiveJournal Password: ")
+    'user': input('Enter LiveJournal Username: '),
+    'password': getpass('Enter LiveJournal Password: ')
 }
 
 # Login with user credentials and retrieve the two cookies required for the main script functions
-response = requests.post("https://www.livejournal.com/login.bml", data=credentials, cookies=cookies)
+response = requests.post('https://www.livejournal.com/login.bml', data=credentials, cookies=cookies)
 
 # If not successful, whine about it.
 if response.status_code != 200:
-    print("Error - Return code:", response.status_code)
+    print('Error - Return code:', response.status_code)
 
 # If successful, then get the 'Set-Cookie' key from the headers dict and parse it for the two cookies, placing them in a cookies dict
 cookies = {
@@ -75,9 +75,9 @@ headers = {
 }
 
 # Now that we have the cookies, notify the user that we'll grab the LJ posts and comments
-print("Login successful. Downloading posts and comments.")
+print('Login successful. Downloading posts and comments.')
 print(
-    "When complete, you will find post-... and comment-... folders in the current location\ncontaining the differently formated versions of your content.")
+    'When complete, you will find post-... and comment-... folders in the current location\ncontaining the differently formated versions of your content.')
 
 COMMENTS_HEADER = 'Комментарии'
 
