@@ -32,7 +32,7 @@ def fetch_month_posts(year, month, cookies, headers):
         data={
             'what': 'journal',
             'year': year,
-            'month': '{0:02d}'.format(month),
+            'month': f'{month:02d}',
             'format': 'xml',
             'header': 'on',
             'encid': '2',
@@ -78,7 +78,7 @@ def download_posts(cookies, headers):
         xml = fetch_month_posts(year, month, cookies, headers)
         xml_posts.extend(list(ET.fromstring(xml).iter('entry')))
 
-        save_text_file('posts-xml/{0}-{1:02d}.xml'.format(year, month), xml)
+        save_text_file(f'posts-xml/{year}-{month:02d}.xml', xml)
 
         month_cursor = month_cursor + relativedelta(months=1)
 

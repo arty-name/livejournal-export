@@ -43,7 +43,7 @@ def get_more_comments(start_id, users, cookies, headers):
     local_max_id = -1
 
     xml = fetch_xml({'get': 'comment_body', 'startid': start_id}, cookies, headers)
-    save_text_file('comments-xml/comment_body-{0}.xml'.format(start_id), xml)
+    save_text_file(f'comments-xml/comment_body-{start_id}.xml', xml)
 
     for comment_xml in ET.fromstring(xml).iter('comment'):
         comment = {
@@ -75,7 +75,7 @@ def comment_meta(cookies, headers):
 
     while start_id is not None and start_id > last_id:
         xml = fetch_xml({'get': 'comment_meta', 'startid': start_id}, cookies, headers)
-        save_text_file('comments-xml/comment_meta-{0}.xml'.format(start_id), xml)
+        save_text_file(f'comments-xml/comment_meta-{start_id}.xml', xml)
 
         metadata = ET.fromstring(xml)
         yield metadata
