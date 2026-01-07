@@ -7,28 +7,32 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
+from authentication import authenticated_request_params
 from utilities import save_json_file, save_text_file
 
 DATE_FORMAT = '%Y-%m'
 
-try:
-    start_month = datetime.strptime(input('Enter start month in YYYY-MM format: '), DATE_FORMAT)
-except Exception as e:
-    print(f'\nError with start month entered. Error: {e}. Exiting...')
-    sysexit(1)
 
-try:
-    end_month = datetime.strptime(input('Enter end month in YYYY-MM format: '), DATE_FORMAT)
-except Exception as e:
-    print(f'\nError with end month entered. Error: {e}. Exiting...')
-    sysexit(1)
+def get_months():
+    try:
+        start_month = datetime.strptime(input('Enter start month in YYYY-MM format: '), DATE_FORMAT)
+    except Exception as e:
+        print(f'\nError with start month entered. Error: {e}. Exiting...')
+        sysexit(1)
+
+    try:
+        end_month = datetime.strptime(input('Enter end month in YYYY-MM format: '), DATE_FORMAT)
+    except Exception as e:
+        print(f'\nError with end month entered. Error: {e}. Exiting...')
+        sysexit(1)
+
+    return start_month, end_month
 
 
-def fetch_month_posts(year, month, cookies, headers):
+def fetch_month_posts(year, month):
     response = requests.post(
         'https://www.livejournal.com/export_do.bml',
-        headers=headers,
-        cookies=cookies,
+        **authenticated_request_params(),
         data={
             'what': 'journal',
             'year': year,
@@ -66,9 +70,11 @@ def xml_to_json(xml):
     }
 
 
-def download_posts(cookies, headers):
+def download_posts():
     os.makedirs('posts-xml', exist_ok=True)
     os.makedirs('posts-json', exist_ok=True)
+
+    start_month, end_month = get_months()
 
     xml_posts = []
     month_cursor = start_month
@@ -77,7 +83,7 @@ def download_posts(cookies, headers):
         year = month_cursor.year
         month = month_cursor.month
 
-        xml = fetch_month_posts(year, month, cookies, headers)
+        xml = fetch_month_posts(year, month)
         xml_posts.extend(list(ET.fromstring(xml).iter('entry')))
 
         save_text_file(f'posts-xml/{year}-{month:02d}.xml', xml)

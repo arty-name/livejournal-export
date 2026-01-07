@@ -4,15 +4,15 @@ import os
 import requests
 import xml.etree.ElementTree as ET
 
+from authentication import authenticated_request_params
 from utilities import save_json_file, save_text_file
 
 
-def fetch_xml(params, cookies, headers):
+def fetch_xml(params):
     response = requests.get(
         'https://www.livejournal.com/export_comments.bml',
         params=params,
-        headers=headers,
-        cookies=cookies
+        **authenticated_request_params(),
     )
 
     return response.text
@@ -38,11 +38,11 @@ def get_comment_element(name, comment_xml, comment):
         comment[name] = elements[0].text
 
 
-def get_more_comments(start_id, users, cookies, headers):
+def get_more_comments(start_id, users):
     comments = []
     local_max_id = -1
 
-    xml = fetch_xml({'get': 'comment_body', 'startid': start_id}, cookies, headers)
+    xml = fetch_xml({'get': 'comment_body', 'startid': start_id})
     save_text_file(f'comments-xml/comment_body-{start_id}.xml', xml)
 
     for comment_xml in ET.fromstring(xml).iter('comment'):
@@ -69,12 +69,12 @@ def get_more_comments(start_id, users, cookies, headers):
     return local_max_id, comments
 
 
-def comment_meta(cookies, headers):
+def comment_meta():
     start_id = 0
     last_id = -1
 
     while start_id is not None and start_id > last_id:
-        xml = fetch_xml({'get': 'comment_meta', 'startid': start_id}, cookies, headers)
+        xml = fetch_xml({'get': 'comment_meta', 'startid': start_id})
         save_text_file(f'comments-xml/comment_meta-{start_id}.xml', xml)
 
         metadata = ET.fromstring(xml)
@@ -85,14 +85,14 @@ def comment_meta(cookies, headers):
         start_id = next_id and int(next_id)
 
 
-def download_comments(cookies, headers):
+def download_comments():
     os.makedirs('comments-xml', exist_ok=True)
     os.makedirs('comments-json', exist_ok=True)
 
     users = {}
     max_id = None
 
-    for metadata in comment_meta(cookies, headers):
+    for metadata in comment_meta():
         users.update(get_users_map(metadata))
 
         if max_id is None:
@@ -103,7 +103,7 @@ def download_comments(cookies, headers):
     all_comments = []
     start_id = 0
     while max_id is not None and start_id < max_id:
-        start_id, comments = get_more_comments(start_id + 1, users, cookies, headers)
+        start_id, comments = get_more_comments(start_id + 1, users)
         all_comments.extend(comments)
 
     save_json_file('comments-json/all.json', all_comments)
