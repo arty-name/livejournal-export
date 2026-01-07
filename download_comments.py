@@ -22,9 +22,6 @@ def get_users_map(xml):
     for user in xml.iter('usermap'):
         users[user.attrib['id']] = user.attrib['user']
 
-    with open('comments-json/usermap.json', 'w', encoding='utf-8') as f:
-        f.write(json.dumps(users, ensure_ascii=False, indent=2))
-
     return users
 
 
@@ -70,21 +67,43 @@ def get_more_comments(start_id, users, cookies, headers):
 
     return local_max_id, comments
 
+
+def comment_meta(cookies, headers):
+    start_id = 0
+    last_id = -1
+
+    while start_id is not None and start_id > last_id:
+        xml = fetch_xml({'get': 'comment_meta', 'startid': start_id}, cookies, headers)
+        with open('comments-xml/comment_meta-{0}.xml'.format(start_id), 'w', encoding='utf-8') as f:
+            f.write(xml)
+
+        metadata = ET.fromstring(xml)
+        yield metadata
+
+        last_id = start_id
+        next_id = metadata.findtext('nextid')
+        start_id = next_id and int(next_id)
+
+
 def download_comments(cookies, headers):
     os.makedirs('comments-xml', exist_ok=True)
     os.makedirs('comments-json', exist_ok=True)
 
-    metadata_xml = fetch_xml({'get': 'comment_meta', 'startid': 0}, cookies, headers)
-    with open('comments-xml/comment_meta.xml', 'w', encoding='utf-8') as f:
-        f.write(metadata_xml)
+    users = {}
+    max_id = None
 
-    metadata = ET.fromstring(metadata_xml)
-    users = get_users_map(metadata)
+    for metadata in comment_meta(cookies, headers):
+        users.update(get_users_map(metadata))
+
+        if max_id is None:
+            max_id = int(metadata.find('maxid').text)
+
+    with open('comments-json/usermap.json', 'w', encoding='utf-8') as f:
+        f.write(json.dumps(users, ensure_ascii=False, indent=2))
 
     all_comments = []
     start_id = 0
-    max_id = int(metadata.find('maxid').text)
-    while start_id < max_id:
+    while max_id is not None and start_id < max_id:
         start_id, comments = get_more_comments(start_id + 1, users, cookies, headers)
         all_comments.extend(comments)
 
