@@ -96,7 +96,7 @@ def download_comments():
         users.update(get_users_map(metadata))
 
         if max_id is None:
-            max_id = int(metadata.find('maxid').text)
+            max_id = int(metadata.findtext('maxid'))
 
     save_json_file('comments-json/usermap.json', users)
 

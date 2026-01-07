@@ -55,7 +55,7 @@ def fetch_month_posts(year, month):
 
 def xml_to_json(xml):
     def f(field):
-        return xml.find(field).text
+        return xml.findtext(field)
 
     return {
         'id': f('itemid'),
