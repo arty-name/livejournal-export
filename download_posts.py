@@ -69,7 +69,7 @@ def xml_to_json(xml):
     item_id = f('itemid')
     return {
         'id': int(item_id) if item_id is not None else get_max_id(),
-        'date': f('logtime'),
+        'date': f('logtime') or f('eventtime'),
         'subject': f('subject') or '',
         'body': f('event'),
         'eventtime': f('eventtime'),
