@@ -6,7 +6,7 @@ this has to be done manually for every month of your blog.
 Also [comments are exported separately](http://www.livejournal.com/developer/exporting.bml).
 I wrote this tool to make exporting more convenient.
 
-You will need Python 3 to use it.
+You will need Python 3.4 or newer to use it.
 
 ## export.py
 
@@ -39,6 +39,11 @@ This script will download comments from your blog as
 `comments-json/all.json` with all the comments data in
 JSON format for convenient processing.
 
+## import_ljarchive.py
+
+This script converts the files downloaded by external tool ljarchive (?)
+into the format used by `export.py`.
+
 ## Requirements
 
 * `dateutil`
@@ -54,3 +59,8 @@ In the last lines of `export.py` there's a condition `if True:`.
 Change `True` to `False` to skip the downloading step and go
 directly to the processing of already downloaded data.
 
+## Processing archives created by ljarchive
+
+If you have already downloaded your blog data using ljarchive,
+place them in the `posts-xml` folder and run `import_ljarchive.py`.
+Then follow the steps described in the previous section.
