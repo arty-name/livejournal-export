@@ -53,12 +53,22 @@ def fetch_month_posts(year, month):
     return response.text
 
 
+max_id = 0
+
+
+def get_max_id():
+    global max_id
+    max_id += 1
+    return max_id
+
+
 def xml_to_json(xml):
     def f(field):
         return xml.findtext(field)
 
+    item_id = f('itemid')
     return {
-        'id': int(f('itemid')),
+        'id': int(item_id) if item_id is not None else get_max_id(),
         'date': f('logtime'),
         'subject': f('subject') or '',
         'body': f('event'),
