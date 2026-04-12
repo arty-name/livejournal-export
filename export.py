@@ -53,7 +53,7 @@ def json_to_html(json):
 def get_slug(json):
     slug = json['subject']
     if not len(slug):
-        slug = json['id']
+        slug = str(json['id'])
 
     if '<' in slug or '&' in slug:
         slug = BeautifulSoup(f'<p>{slug}</p>', features='lxml').text
@@ -62,7 +62,7 @@ def get_slug(json):
     slug = re.compile(r'^-|-$').sub('', slug)
 
     if slug in SLUGS:
-        slug += (len(slug) and '-' or '') + json['id']
+        slug += (len(slug) and '-' or '') + str(json['id'])
 
     SLUGS[slug] = True
 
@@ -183,7 +183,7 @@ def combine(all_posts, all_comments):
 
     for json_post in all_posts:
         id = json_post['id']
-        jitemid = int(id) >> 8
+        jitemid = id >> 8
 
         date = datetime.strptime(json_post['date'], '%Y-%m-%d %H:%M:%S')
         subfolder = f'{date.year}-{date.month:02d}'

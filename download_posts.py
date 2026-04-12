@@ -58,7 +58,7 @@ def xml_to_json(xml):
         return xml.findtext(field)
 
     return {
-        'id': f('itemid'),
+        'id': int(f('itemid')),
         'date': f('logtime'),
         'subject': f('subject') or '',
         'body': f('event'),
