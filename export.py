@@ -8,9 +8,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from markdown import markdown
 from operator import itemgetter
-from pathlib import Path
 
-from download_posts import download_posts, convert_posts
+from download_posts import download_posts
 from download_comments import download_comments
 from utilities import save_json_file, save_text_file
 
@@ -63,7 +62,7 @@ def get_slug(json):
     slug = re.compile(r'^-|-$').sub('', slug)
 
     if slug in SLUGS:
-        slug += (len(slug) and '-' or '') + str(json['id'])
+        slug += (len(slug) and '-' or '') + json['id']
 
     SLUGS[slug] = True
 
@@ -186,7 +185,7 @@ def combine(all_posts, all_comments):
         id = json_post['id']
         jitemid = int(id) >> 8
 
-        date = datetime.strptime(json_post.get('date', json_post.get('eventtime')), '%Y-%m-%d %H:%M:%S')
+        date = datetime.strptime(json_post['date'], '%Y-%m-%d %H:%M:%S')
         subfolder = f'{date.year}-{date.month:02d}'
 
         post_comments = jitemid in posts_comments and nest_comments(posts_comments[jitemid]) or None
@@ -212,16 +211,9 @@ if __name__ == '__main__':
     else:
         print('Processing previously downloaded posts and comments…')
 
-        posts_json = Path('posts-json/all.json')
-        if not posts_json.exists():
-            convert_posts()
         with open('posts-json/all.json', 'r', encoding='utf-8') as f:
             all_posts = json.load(f)
-        comments_json = Path('comments-json/all.json')
-        if comments_json.exists():
-            with open('comments-json/all.json', 'r', encoding='utf-8') as f:
-                all_comments = json.load(f)
-        else:
-            all_comments = {}
+        with open('comments-json/all.json', 'r', encoding='utf-8') as f:
+            all_comments = json.load(f)
 
     combine(all_posts, all_comments)
