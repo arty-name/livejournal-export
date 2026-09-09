@@ -1,6 +1,10 @@
 import json
 
 
+class ExportError(Exception):
+    """An export cannot continue safely without user intervention."""
+
+
 def save_text_file(name, text):
     with open(name, 'w', encoding='utf-8') as file:
         file.write(text)
