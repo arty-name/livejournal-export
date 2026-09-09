@@ -6,7 +6,7 @@ this has to be done manually for every month of your blog.
 Also [comments are exported separately](http://www.livejournal.com/developer/exporting.bml).
 I wrote this tool to make exporting more convenient.
 
-You will need Python 3.4 or newer to use it.
+You will need Python 3.12 or newer to use it.
 
 ## export.py
 
@@ -25,6 +25,35 @@ the range of months you want to pull, then will ask for your
 LiveJournal username and password. It will use that to 
 acquire the required session cookies. After this, the
 download process will begin.
+
+## Network errors and historical XML
+
+Login and export share an HTTPS session. Read-only post/comment downloads retry
+transient connection failures, incomplete chunked responses, HTTP 502/503/504,
+and malformed or non-export responses up to four total attempts, waiting 2, 4,
+and 8 seconds. Requests have 15-second connection and 60-second read timeouts.
+Login is not retried, and TLS certificate verification remains enabled.
+
+Unexpected responses are saved privately under `diagnostics/` after the final
+attempt, with safe metadata describing the failure and XML error position.
+These files can contain private post text and are excluded from Git. Request
+headers, cookies, and credentials are not logged. XML-forbidden literal control
+characters are replaced with U+FFFD only if the complete result then passes
+strict parsing; the original response is preserved and the repair is reported.
+Other malformed XML is never silently accepted as an empty month.
+
+Historical comment exports can declare UTF-8 while containing Windows-1251
+subjects/bodies alongside newer UTF-8 comments. Text fields are decoded
+independently: valid UTF-8 is preserved; otherwise the entire field is decoded
+strictly as Windows-1251. This automatic fallback assumes one encoding per field
+and Windows-1251 for legacy text; it does not detect arbitrary legacy encodings.
+Only subject/body payloads are converted. The original bytes are retained and
+the complete result must pass strict XML parsing. No bytes are silently dropped.
+
+## Tests
+
+Install the requirements below, then run `python -m unittest discover -v`.
+Tests use synthetic fixtures and require no LiveJournal credentials or network.
 
 ## download_posts.py
 
