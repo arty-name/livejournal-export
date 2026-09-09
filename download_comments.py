@@ -1,21 +1,20 @@
 #!/usr/bin/python3
 
 import os
-import requests
 import xml.etree.ElementTree as ET
 
 from authentication import authenticated_request_params
+from http_client import export_xml
 from utilities import save_json_file, save_text_file
 
 
 def fetch_xml(params):
-    response = requests.get(
-        'https://www.livejournal.com/export_comments.bml',
+    return export_xml(
+        'GET', '/export_comments.bml',
         params=params,
         **authenticated_request_params(),
     )
 
-    return response.text
 
 
 def get_users_map(xml):

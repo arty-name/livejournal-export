@@ -1,13 +1,13 @@
 #!/usr/bin/python3
 
 import os
-import requests
 from sys import exit as sysexit
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
 from authentication import authenticated_request_params
+from http_client import export_xml
 from utilities import save_json_file, save_text_file
 
 DATE_FORMAT = '%Y-%m'
@@ -30,8 +30,8 @@ def get_months():
 
 
 def fetch_month_posts(year, month):
-    response = requests.post(
-        'https://www.livejournal.com/export_do.bml',
+    return export_xml(
+        'POST', '/export_do.bml',
         **authenticated_request_params(),
         data={
             'what': 'journal',
@@ -50,7 +50,6 @@ def fetch_month_posts(year, month):
             'field_currents': 'on'
         }
     )
-    return response.text
 
 
 max_id = 0

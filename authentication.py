@@ -1,7 +1,7 @@
 from getpass import getpass
 from sys import exit as sysexit
 
-import requests
+from http_client import request
 
 
 def get_cookie_value(response, name):
@@ -30,7 +30,7 @@ def get_luid_cookie():
             'sec-ch-ua-platform': '"Windows"',
         }
 
-        response = requests.get('https://www.livejournal.com/', headers=headers)
+        response = request('GET', '/', headers=headers)
 
         return get_cookie_value(response, 'luid')
     except Exception as exception:
@@ -49,18 +49,19 @@ def get_authenticated_cookies():
     }
 
     # login with user credentials and retrieve the two cookies required for the main script functions
-    response = requests.post('https://www.livejournal.com/login.bml', data=credentials, cookies=cookies)
+    response = request('POST', '/login.bml', data=credentials, cookies=cookies)
 
     if not response.ok:
         print(f'Error! Return code: {response.status_code}')
         sysexit(1)
 
     # prepare two cookies necessary for the authenticated requests
-    print('Login successful!')
-    return {
+    authenticated_cookies = {
         'ljloggedin': get_cookie_value(response, 'ljloggedin'),
         'ljmastersession': get_cookie_value(response, 'ljmastersession')
     }
+    print('Login successful!')
+    return authenticated_cookies
 
 
 headers = {

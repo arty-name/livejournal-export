@@ -11,6 +11,7 @@ from operator import itemgetter
 
 from download_posts import download_posts
 from download_comments import download_comments
+from http_client import LiveJournalRequestError
 from utilities import save_json_file, save_text_file
 
 COMMENTS_HEADER = 'Комментарии'
@@ -205,8 +206,11 @@ if __name__ == '__main__':
         print(
             'When complete, you will find post-… and comment-… folders in the current location\ncontaining the differently formated versions of your content.')
 
-        all_posts = download_posts()
-        all_comments = download_comments()
+        try:
+            all_posts = download_posts()
+            all_comments = download_comments()
+        except LiveJournalRequestError as error:
+            raise SystemExit(f'Export stopped: {error}\nDownloaded XML files are kept.') from None
 
     else:
         print('Processing previously downloaded posts and comments…')
