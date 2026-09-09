@@ -26,6 +26,27 @@ LiveJournal username and password. It will use that to
 acquire the required session cookies. After this, the
 download process will begin.
 
+To continue an interrupted download, run `python export.py --resume` with the
+same account and the original full date range. Completed monthly XML files are
+validated and reused; both cached and newly downloaded posts are included in the
+result. Comments are downloaded after all posts. Resume also reuses validated
+comment metadata and body batches, continuing the saved snapshot up to its
+recorded maximum comment ID. Without `--resume`, the selected months and comment
+batches are downloaded again.
+
+The first run records the authenticated login name in `posts-xml/.account.json`.
+Every later run, with or without `--resume`, checks this account before reading or
+overwriting saved exports. Passwords and session cookies are not stored. Use
+separate working directories for different journals. Existing exports without
+an account file are assigned to the account used on their first run with this
+version; only resume such a directory with its original account.
+
+Monthly XML, comment batches, and aggregate JSON files are written atomically so
+interruptions cannot leave partially written cache files. Invalid cached XML is
+kept for inspection and stops the export instead of being silently skipped or
+overwritten. Comment pagination stops with an error if the server makes no
+progress. After a failure, use `--resume` to continue from completed files.
+
 ## download_posts.py
 
 This script will download your posts in XML into `posts-xml` 

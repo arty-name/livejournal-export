@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import argparse
 import json
 import re
 import html2text
@@ -11,7 +12,7 @@ from operator import itemgetter
 
 from download_posts import download_posts
 from download_comments import download_comments
-from utilities import save_json_file, save_text_file
+from utilities import ExportError, save_json_file, save_text_file
 
 COMMENTS_HEADER = 'Комментарии'
 
@@ -200,13 +201,24 @@ def combine(all_posts, all_comments):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Export LiveJournal posts and comments.')
+    parser.add_argument('--resume', action='store_true',
+                        help='Reuse saved post months and comment batches for the same account and date range.')
+    args = parser.parse_args()
     if True:
         print('Downloading posts and comments…')
         print(
             'When complete, you will find post-… and comment-… folders in the current location\ncontaining the differently formated versions of your content.')
 
-        all_posts = download_posts()
-        all_comments = download_comments()
+        try:
+            all_posts = download_posts(resume=args.resume)
+            all_comments = download_comments(resume=args.resume)
+        except ExportError as error:
+            raise SystemExit(
+                f'Export stopped: {error}\n'
+                'Downloaded files are kept. Rerun with --resume using the same '
+                'account and date range to skip saved post months and comment batches.'
+            ) from None
 
     else:
         print('Processing previously downloaded posts and comments…')

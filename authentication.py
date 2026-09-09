@@ -1,7 +1,13 @@
 from getpass import getpass
 from sys import exit as sysexit
+import json
+import os
+from pathlib import Path
+import tempfile
 
 import requests
+
+from utilities import ExportError
 
 
 def get_cookie_value(response, name):
@@ -39,12 +45,13 @@ def get_luid_cookie():
 
 
 def get_authenticated_cookies():
+    global cachedUsername
     cookies = {
         'luid': get_luid_cookie()
     }
 
     credentials = {
-        'user': input('Enter LiveJournal Username: '),
+        'user': input('Enter LiveJournal Username: ').strip(),
         'password': getpass('Enter LiveJournal Password: ')
     }
 
@@ -56,11 +63,13 @@ def get_authenticated_cookies():
         sysexit(1)
 
     # prepare two cookies necessary for the authenticated requests
-    print('Login successful!')
-    return {
+    authenticated_cookies = {
         'ljloggedin': get_cookie_value(response, 'ljloggedin'),
         'ljmastersession': get_cookie_value(response, 'ljmastersession')
     }
+    cachedUsername = credentials['user'].casefold()
+    print('Login successful!')
+    return authenticated_cookies
 
 
 headers = {
@@ -68,6 +77,7 @@ headers = {
 }
 
 cachedCookies = None
+cachedUsername = None
 
 
 def authenticated_request_params():
@@ -80,3 +90,40 @@ def authenticated_request_params():
         'headers': headers,
         'cookies': cachedCookies,
     }
+
+
+def bind_export_account(*, resume=False):
+    """Bind new or legacy exports on first use; every later run checks ownership."""
+    authenticated_request_params()
+    if not cachedUsername:
+        raise ExportError('Cannot identify the account for the saved export.')
+    folder = Path('posts-xml')
+    folder.mkdir(exist_ok=True)
+    manifest = folder / '.account.json'
+
+    def check_existing():
+        try:
+            account = json.loads(manifest.read_text(encoding='utf-8'))['username']
+        except (OSError, ValueError, KeyError, TypeError):
+            raise ExportError('Cannot read posts-xml/.account.json; cache left unchanged.') from None
+        if account != cachedUsername:
+            raise ExportError(
+                'The saved export belongs to another account. Use that account '
+                'for this directory, or a separate directory for a different journal.'
+            )
+
+    if manifest.exists():
+        check_existing()
+        return
+    fd, temporary = tempfile.mkstemp(prefix='.account-', dir=folder)
+    try:
+        with os.fdopen(fd, 'w', encoding='utf-8') as file:
+            json.dump({'username': cachedUsername}, file)
+            file.flush()
+            os.fsync(file.fileno())
+        try:
+            os.link(temporary, manifest)
+        except FileExistsError:
+            check_existing()
+    finally:
+        os.unlink(temporary)
